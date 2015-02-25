@@ -1,5 +1,6 @@
 var request = require('request');
 var cheerio = require('cheerio');
+var wappalyzer = require("wappalyzer");
 
 // Constants used for making requests
 var iPhone6UserAgent = 'Mozilla/6.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/8.0 Mobile/10A5376e Safari/8536.25';
@@ -60,26 +61,49 @@ exports.check = function(domainName, callback) {
                 followRedirect: true
             };
             
-            // If we don't have a mobile friendly site, check if the content changes depending on the user agent
-            if (!mobileProperties['mobile_friendly_url']) {
-                
-                // Make new request using a common desktop user agent (Chrome)
-                var rDesktop = request(requestDesktopOptions, function(err, resDesktop, bodyDesktop) {
-                    
-                    // If the request was completed successfully, compare the responses bodies
-                    if (!err && resDesktop && resDesktop.statusCode == 200) {
-                        
-                        if (bodyMobile != bodyDesktop) {
-                            mobileProperties['is_adaptive'] = 1;
-                        }
-                    }
-                    
-                    callback(0, domainName, mobileProperties);
-                });
-                
-            } else {
-                callback(0, domainName, mobileProperties);
+            
+            // Check CMSs & Platforms
+            var wappalyzerOptions = {
+                url : rMobile.uri.href,
+                hostname: domainName,
+                debug:false
             }
+            
+            var wappalyzerData = {
+                html: bodyMobile,
+                url: rMobile.uri.href,
+                headers: resMobile
+            };
+            
+            wappalyzer.detectFromUrl(wappalyzerOptions, function  (err, apps, appInfo) {
+                
+                if (!err && apps) {
+                    mobileProperties['cmses'] = apps;
+                    console.log()
+                    console.log(apps);
+                }
+                
+                // If we don't have a mobile friendly site, check if the content changes depending on the user agent
+                if (!mobileProperties['mobile_friendly_url']) {
+                    
+                    // Make new request using a common desktop user agent (Chrome)
+                    var rDesktop = request(requestDesktopOptions, function(err, resDesktop, bodyDesktop) {
+                        
+                        // If the request was completed successfully, compare the responses bodies
+                        if (!err && resDesktop && resDesktop.statusCode == 200) {
+                            
+                            if (bodyMobile != bodyDesktop) {
+                                mobileProperties['is_adaptive'] = 1;
+                            }
+                        }
+                        
+                        callback(0, domainName, mobileProperties);
+                    });
+                    
+                } else {
+                    callback(0, domainName, mobileProperties);
+                }
+            });
         }
     });
 }
@@ -101,4 +125,8 @@ this.check('carrefour-online.ro', function(err, domain, result){
 this.check('businessinsider.com', function(err, domain, result){
     console.log(err, result)  
 });
-*/
+
+
+this.check('codelanka.github.io', function(err, domain, result){
+    console.log(err, result)  
+});*/
