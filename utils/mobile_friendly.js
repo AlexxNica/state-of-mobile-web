@@ -4,6 +4,8 @@ var wappalyzer = require("wappalyzer");
 
 // Constants used for making requests
 var iPhone6UserAgent = 'Mozilla/6.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/8.0 Mobile/10A5376e Safari/8536.25';
+// var iPhone5UserAgent = 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5';
+
 var chromeUserAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.115 Safari/537.36';
 
 // check mobile friendly, mobile app, adaptive
@@ -14,7 +16,9 @@ exports.check = function(domainName, callback) {
         headers: {        
             'User-Agent': iPhone6UserAgent
         },
-        followRedirect: true
+        followRedirect: true,
+        followAllRedirects: true,
+        maxRedirects: 100
     };
     
     var rMobile = request(requestMobileOptions, function(err, resMobile, bodyMobile) {
@@ -79,8 +83,6 @@ exports.check = function(domainName, callback) {
                 
                 if (!err && apps) {
                     mobileProperties['cmses'] = apps;
-                    console.log()
-                    console.log(apps);
                 }
                 
                 // If we don't have a mobile friendly site, check if the content changes depending on the user agent
@@ -128,5 +130,14 @@ this.check('businessinsider.com', function(err, domain, result){
 
 
 this.check('codelanka.github.io', function(err, domain, result){
+    console.log(err, result)  
+});
+
+this.check('www.thehindu.com', function(err, domain, result){
+    console.log(err, result)  
+});
+*/
+/*
+this.check('smh.com.au', function(err, domain, result){
     console.log(err, result)  
 });*/

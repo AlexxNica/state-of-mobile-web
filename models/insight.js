@@ -16,7 +16,9 @@ var InsightSchema = new Schema({
     'app_meta_tag': String,
     'is_mobile_friendly': Number,
     'mobile_friendly_url': String,
-    'cmses': [String]
+    'cmses': [String],
+    
+    'invalid': Number
 });
 
 module.exports = mongoose.model('insight', InsightSchema);

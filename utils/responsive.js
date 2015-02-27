@@ -1,6 +1,8 @@
 var Pageres = require('pageres');
 var Image = require('canvas').Image;
 var fs = require('fs');
+var screenshot = require('screenshot-stream');
+var fsWriteStreamAtomic = require('fs-write-stream-atomic');
 
 // Constants used for screenshots
 var iPhone6UserAgent = 'Mozilla/6.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/8.0 Mobile/10A5376e Safari/8536.25';
@@ -9,61 +11,86 @@ var iPhoneWidth = 375;
 var iPhoneHeight = 667;
 var iPhoneSize = String(iPhoneWidth) + "x" + String(iPhoneHeight);
 
-
 // Main method - check if a domain name is responsive
-exports.check = function(domainName, callback) {
+exports.check = function(domainName, callback){
     
-    // Make screenshots for each domain using a mobile user agent
-    var pageres = new Pageres({delay: 2, filename: '<%= url %>__<%= size %>', format: 'jpg'})
-        .src(domainName, [iPhoneSize], {'customHeaders' : {'User-Agent' : iPhone6UserAgent } })
-        .dest(__dirname+'/../screenshots');
-    
-    
-    pageres.run(function (err, items) {
+    makeScreen(domainName, function(err, domain, filename, warning){
         
-        if (err) {
-            console.log("Unable to make screenshot ", err);
+        if (err && !domain) {
             callback(1);
         } else {
             
-            // Items will contain a single element because we added a single .src 
-            for (var k=0; k < items.length; k++) {
+            // Get the width & height of the screenshot
+            getImageSize(filename, function(err, imageProperties){
                 
-                var filenameDomain = items[k].filename.split('__')[0];
-                
-                // Get the width & height of the screenshot
-                getImageSize(__dirname+'/../screenshots/'+items[k].filename, function(err, imageSize){
+                if (err || !imageProperties) {
                     
-                    if (err || !imageSize) {
+                    console.log("Unable to read image size");
+                    callback(1);
+                    
+                } else {
+                    
+                    // The domain is responsive if the screenshot has the expected iPhone width
+                    var isResponsive = Number(imageProperties.width <= iPhoneWidth);
+                    
+                    if (!isResponsive && warning) {
                         
-                        console.log("Unable to read image size");
-                        callback(1);
+                        callback(0, domain);
                         
                     } else {
                         
-                        // The domain is responsive if the screenshot has the expected iPhone width
-                        var isResponsive = Number(imageSize.width <= iPhoneWidth);
-                        
                         var responsiveProperties = {
-                            'width' : imageSize.width,
-                            'height' : imageSize.height,
+                            // 'domain': imageProperties.domain,
+                            'width' : imageProperties.width,
+                            'height' : imageProperties.height,
                             'is_responsive': isResponsive
                         }
                         
                         // If we have a responsive website, calculate the ratio between its height and the device's height
                         if (isResponsive) {
-                            responsiveProperties['height_ratio'] = Math.round(imageSize.height * 100 / iPhoneHeight) / 100;
+                            responsiveProperties['height_ratio'] = Math.round(imageProperties.height * 100 / iPhoneHeight) / 100;
                         }
                         
-                        callback(0, filenameDomain, responsiveProperties);                        
+                        // console.log("responsiveProperties ", domain, responsiveProperties)
+                        callback(0, domain, responsiveProperties);
                     }
-                })
-                
-                break;
-            }
-        }        
+                }
+            })
+        }
+    })
+}
+
+
+// Make printscreen
+function makeScreen(domainName, callback) {
+    
+    var stream = screenshot('http://' + domainName, iPhoneSize, {'delay': 2, 'customHeaders' : {'User-Agent' : iPhone6UserAgent }});
+        
+    var dest = __dirname+'/../screenshots/'+domainName+'__'+iPhoneSize+'.png';
+    var write = fsWriteStreamAtomic(dest);
+    var pipe = stream.pipe(write);
+    var warning = false;
+    
+    stream.on('warn', function(err){
+        console.log("responsive:makeScreen> Stream warning", err);
+        warning = true;
+    });
+    
+    stream.on('error', function (err) {
+        console.log("responsive:makeScreen> Stream error ", domainName, err);
+        callback(1);
+    });
+    
+    pipe.on('error', function (err) {
+        console.log("responsive:makeScreen> Pipe error ", domainName, err);
+        callback(1);
+    });
+    
+    pipe.on('finish', function(result){
+        callback(0, domainName, dest, warning);
     });
 }
+
 
 // Get the width & height of an image
 function getImageSize(filename, callback){
@@ -92,15 +119,7 @@ function getImageSize(filename, callback){
     });
 }
 
-/*
-this.check('app.journalism.co.uk', function(err, domain, results){
-    console.log(err, domain, results);  
-})
 
-this.check('newyorktimes.com', function(err, domain, results){
-    console.log(err, domain, results);  
-})
-
-this.check('businessinsider.com', function(err, domain, results){
-    console.log(err, domain, results);  
-})*/
+this.check('newyorktimes.com', function(err, result, result2){
+    console.log(err, result, result2)  
+});

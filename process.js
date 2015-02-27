@@ -5,37 +5,94 @@ var mobile_friendly = require('./utils/mobile_friendly.js');
 
 var Insight = require('./models/insight');
 
-exports.processDomains = function(){
+exports.processDomains = function(page, callback){
     
-    Insight.find({"domain": {"$exists": true}}).sort({'order':1}).exec( function(err, data) {
+    var limit = 5;
+    var skip = (page - 1) * limit;
+    
+    Insight.find({"domain": {"$exists": true}, "is_responsive": 0}, {}, {skip: skip, limit: limit}).sort({'_id':1}).exec( function(err, data) {
         
         if (!err && data) {
+            
+            var domainNames = [];
             
             for ( var i = 0; i < data.length; i++ ) {
                 
                 var domainName = data[i].domain;
-                
-                // check if the domain is responsive (calculate width & height)
-                responsive.check(domainName, function(err, filenameDomain, properties){
-                    if (!err && filenameDomain && properties) {
-                        updateInsightDocument(filenameDomain, properties);
-                    }
-                });
-                
-                mobile_friendly.check(domainName, function(err, filenameDomain, properties){
-                    if (!err && filenameDomain && properties) {
-                        updateInsightDocument(filenameDomain, properties);
-                    }
-                });
-                
-                page_insights.check(domainName, function(err, filenameDomain, properties){
-                    if (!err && filenameDomain && properties) {
-                        updateInsightDocument(filenameDomain, properties);
-                    }
-                });
+                domainNames.push(domainName)
             }
+            
+            if (domainNames.length > 0) {
+                
+                checkResponsiveDomains(0, domainNames, function(err){
+                    callback(0);
+                })
+                
+            } else {
+                callback(1);
+            }
+            
+        } else {
+            callback(1);
         }
     });
+}
+
+function checkResponsiveDomains(current, domainNames, callback){
+    
+    if (current >= domainNames.length) {
+        
+        callback(0);
+        return;
+    
+    } else {
+        
+        console.log("checkonebyone ", current, domainNames[current]);
+        
+        var receivedResponse = 0;
+        
+        mobile_friendly.check(domainNames[current], function(err, filenameDomain, properties){
+            
+            if (!err && filenameDomain && properties) {
+                updateInsightDocument(filenameDomain, properties);
+            }
+            
+            receivedResponse++;
+            
+            if (receivedResponse == 3) {
+                checkResponsiveDomains(current + 1, domainNames, callback);
+            }
+        });
+        
+        page_insights.check(domainNames[current], function(err, filenameDomain, properties){
+            if (!err && filenameDomain && properties) {
+                updateInsightDocument(filenameDomain, properties);
+            }
+
+            receivedResponse++;
+            if (receivedResponse == 3) {
+                checkResponsiveDomains(current + 1, domainNames, callback);
+            }
+        });
+        
+        responsive.check(domainNames[current], function(err, filenameDomain, properties){
+            
+            console.log("receivedResponse responsive ", err, filenameDomain, properties);
+            
+            if (!err && filenameDomain && properties) {
+                updateInsightDocument(filenameDomain, properties);
+            } else if (filenameDomain) {
+                console.log("update invalid: ", filenameDomain)
+                updateInsightDocument(filenameDomain, {'invalid': 1});
+            }
+            
+            receivedResponse++;
+            
+            if (receivedResponse == 3) {
+                checkResponsiveDomains(current + 1, domainNames, callback);
+            }
+        });
+    }
 }
 
 function updateInsightDocument(domainName, properties) {
@@ -46,6 +103,4 @@ function updateInsightDocument(domainName, properties) {
         } 
     });
 }
-
-
 
