@@ -16,6 +16,8 @@
     "wappalyzer": "~2.0.2",
     "mocha": "~2.1.0",
     "screenshot-stream": "~1.2.3",
-    "fs-write-stream-atomic": "~1.0.2"
+    "fs-write-stream-atomic": "~1.0.2",
+    "phantom-bridge": "~1.0.0",
+    "es5-shim" : "~4.1.0"
   }
 }

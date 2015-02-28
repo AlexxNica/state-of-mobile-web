@@ -73,7 +73,7 @@ function makeScreen(domainName, callback) {
     
     stream.on('warn', function(err){
         console.log("responsive:makeScreen> Stream warning", err);
-        warning = true;
+        // warning = true;
     });
     
     stream.on('error', function (err) {
@@ -120,6 +120,6 @@ function getImageSize(filename, callback){
 }
 
 
-this.check('newyorktimes.com', function(err, result, result2){
+this.check('amarujala.com', function(err, result, result2){
     console.log(err, result, result2)  
 });

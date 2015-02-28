@@ -4,23 +4,26 @@ var wappalyzer = require("wappalyzer");
 
 // Constants used for making requests
 var iPhone6UserAgent = 'Mozilla/6.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/8.0 Mobile/10A5376e Safari/8536.25';
-// var iPhone5UserAgent = 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5';
-
 var chromeUserAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.115 Safari/537.36';
 
 // check mobile friendly, mobile app, adaptive
-exports.check = function(domainName, callback) {
+exports.check = function(domainName, mobileRedirectUrl, callback) {
     
-    var requestMobileOptions = {
-        url: 'http://'+domainName,
+    var mobileProperties = {
+        'is_adaptive' : 0,
+        'has_app' : 0
+    }
+    
+     var requestMobileOptions = {
+        url: mobileRedirectUrl,
         headers: {        
             'User-Agent': iPhone6UserAgent
         },
         followRedirect: true,
         followAllRedirects: true,
-        maxRedirects: 100
+        maxRedirects: 20
     };
-    
+            
     var rMobile = request(requestMobileOptions, function(err, resMobile, bodyMobile) {
     
         // Check if the request completed with an error
@@ -28,25 +31,6 @@ exports.check = function(domainName, callback) {
             callback(1);
         } else {
         
-            var mobileProperties = {
-                'is_adaptive' : 0,
-                'has_app' : 0,
-                'is_mobile_friendly': 0
-            }
-            
-            // Check if the redirect url is the same with the initial url
-            var finalUrl = rMobile.uri.href;
-            finalUrl = finalUrl.replace("http://", "");
-            finalUrl = finalUrl.replace("https://", "");
-            finalUrl = finalUrl.replace("www.", "");
-            finalUrl = finalUrl.replace("/", "");
-            
-            // If we were redirected to a different url, assume we have a mobile friendly site
-            if (finalUrl != domainName) {
-                mobileProperties['is_mobile_friendly'] = 1;
-                mobileProperties['mobile_friendly_url'] = rMobile.uri.href;
-            }
-            
             // Check if the source contains a meta tag indicating a native app (smart banner)
             var $ = cheerio.load(bodyMobile);
             var iTunesMetaTag = $('meta[name=apple-itunes-app]');
@@ -107,10 +91,8 @@ exports.check = function(domainName, callback) {
                 }
             });
         }
-    });
+    })  
 }
-
-
 
 /*getMobileProperties('app.journalism.co.uk', function(err, result){
     console.log(err, result)  
@@ -132,11 +114,11 @@ this.check('businessinsider.com', function(err, domain, result){
 this.check('codelanka.github.io', function(err, domain, result){
     console.log(err, result)  
 });
-
-this.check('www.thehindu.com', function(err, domain, result){
+*/
+this.check('thehindu.com', 'http://m.thehindu.com/', function(err, domain, result){
     console.log(err, result)  
 });
-*/
+
 /*
 this.check('smh.com.au', function(err, domain, result){
     console.log(err, result)  
