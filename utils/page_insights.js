@@ -46,7 +46,8 @@ exports.check = function(domainName, callback){
                     
                     var pageInsights = {
                         'score': Number(data.score),
-                        'bytes_total': totalBytes
+                        'bytes_total': totalBytes,
+                        'processed': 1
                     };
                     
                     callback(0, domainName, pageInsights);

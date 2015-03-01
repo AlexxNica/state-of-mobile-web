@@ -18,7 +18,7 @@ var InsightSchema = new Schema({
     'mobile_friendly_url': String,
     'cmses': [String],
     
-    'invalid': Number
+    'processed': Number
 });
 
 module.exports = mongoose.model('insight', InsightSchema);

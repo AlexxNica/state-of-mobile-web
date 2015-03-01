@@ -1,35 +1,47 @@
 // Include modules
+var handle_redirect = require('./utils/handle_redirect.js');
 var responsive = require('./utils/responsive.js');
 var page_insights = require('./utils/page_insights.js');
 var mobile_friendly = require('./utils/mobile_friendly.js');
 
 var Insight = require('./models/insight');
 
+// Read domains from the database and process them
 exports.processDomains = function(page, callback){
     
     var limit = 5;
     var skip = (page - 1) * limit;
     
-    Insight.find({"domain": {"$exists": true}, "is_responsive": 0}, {}, {skip: skip, limit: limit}).sort({'_id':1}).exec( function(err, data) {
+    Insight.find({"domain": {"$exists": true}, 'is_responsive': 0}, {}, {skip: skip, limit: limit}).sort({'_id':1}).exec( function(err, data) {
         
         if (!err && data) {
             
             var domainNames = [];
             
-            for ( var i = 0; i < data.length; i++ ) {
+            if (data.length == 0) {
                 
-                var domainName = data[i].domain;
-                domainNames.push(domainName)
-            }
-            
-            if (domainNames.length > 0) {
-                
-                checkResponsiveDomains(0, domainNames, function(err){
-                    callback(0);
-                })
+                callback(1);
                 
             } else {
-                callback(1);
+                
+                for ( var i = 0; i < data.length; i++ ) {
+                    
+                    var domainName = data[i].domain;
+                    console.log(domainName)
+                    
+                    handle_redirect.check(domainName, function(err, domain, redirectUrl){
+                    
+                        domainNames.push({'domain': domain, 'redirectUrl': redirectUrl});
+                        
+                        if (domainNames.length == data.length) {
+                            
+                            checkResponsiveDomains(0, domainNames, function(err){
+                                callback(0);
+                            })
+                        }
+                    })
+                    
+                }
             }
             
         } else {
@@ -50,8 +62,10 @@ function checkResponsiveDomains(current, domainNames, callback){
         console.log("checkonebyone ", current, domainNames[current]);
         
         var receivedResponse = 0;
+        var domainName = domainNames[current]['domain'];
+        var redirectUrl = domainNames[current]['redirectUrl'];
         
-        mobile_friendly.check(domainNames[current], function(err, filenameDomain, properties){
+        mobile_friendly.check(domainName, redirectUrl, function(err, filenameDomain, properties){
             
             if (!err && filenameDomain && properties) {
                 updateInsightDocument(filenameDomain, properties);
@@ -64,26 +78,23 @@ function checkResponsiveDomains(current, domainNames, callback){
             }
         });
         
-        page_insights.check(domainNames[current], function(err, filenameDomain, properties){
+        page_insights.check(domainName, function(err, filenameDomain, properties){
             if (!err && filenameDomain && properties) {
                 updateInsightDocument(filenameDomain, properties);
             }
-
+            
             receivedResponse++;
             if (receivedResponse == 3) {
                 checkResponsiveDomains(current + 1, domainNames, callback);
             }
         });
         
-        responsive.check(domainNames[current], function(err, filenameDomain, properties){
+        responsive.check(domainName, redirectUrl, function(err, filenameDomain, properties){
             
             console.log("receivedResponse responsive ", err, filenameDomain, properties);
             
             if (!err && filenameDomain && properties) {
                 updateInsightDocument(filenameDomain, properties);
-            } else if (filenameDomain) {
-                console.log("update invalid: ", filenameDomain)
-                updateInsightDocument(filenameDomain, {'invalid': 1});
             }
             
             receivedResponse++;
@@ -92,6 +103,7 @@ function checkResponsiveDomains(current, domainNames, callback){
                 checkResponsiveDomains(current + 1, domainNames, callback);
             }
         });
+        
     }
 }
 

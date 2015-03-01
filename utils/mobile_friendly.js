@@ -7,15 +7,30 @@ var iPhone6UserAgent = 'Mozilla/6.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) Ap
 var chromeUserAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.115 Safari/537.36';
 
 // check mobile friendly, mobile app, adaptive
-exports.check = function(domainName, mobileRedirectUrl, callback) {
+exports.check = function(domainName, redirectUrl, callback) {
     
     var mobileProperties = {
         'is_adaptive' : 0,
-        'has_app' : 0
+        'has_app' : 0,
+        'is_mobile_friendly' : 0,
+        'processed': 1
     }
     
-     var requestMobileOptions = {
-        url: mobileRedirectUrl,
+    // Check if the redirect url is the same with the initial url
+    var finalUrl = redirectUrl;
+    finalUrl = finalUrl.replace("http://", "");
+    finalUrl = finalUrl.replace("https://", "");
+    finalUrl = finalUrl.replace("www.", "");
+    finalUrl = finalUrl.replace("/", "");
+    
+    // If we were redirected to a different url, assume we have a mobile friendly site
+    if (finalUrl != domainName) {
+        mobileProperties['is_mobile_friendly'] = 1;
+        mobileProperties['mobile_friendly_url'] = redirectUrl;
+    }
+    
+    var requestMobileOptions = {
+        url: redirectUrl,
         headers: {        
             'User-Agent': iPhone6UserAgent
         },
@@ -114,11 +129,11 @@ this.check('businessinsider.com', function(err, domain, result){
 this.check('codelanka.github.io', function(err, domain, result){
     console.log(err, result)  
 });
-*/
-this.check('thehindu.com', 'http://m.thehindu.com/', function(err, domain, result){
-    console.log(err, result)  
-});
 
+this.check('thehindu.com', 'http://m.thehindu.com/', function(err, domain, result){
+    console.log(err, domain, result)  
+});
+*/
 /*
 this.check('smh.com.au', function(err, domain, result){
     console.log(err, result)  
