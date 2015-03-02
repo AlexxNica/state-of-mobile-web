@@ -69,6 +69,7 @@ function checkResponsiveDomains(current, domainNames, callback){
         
         mobile_friendly.check(domainName, redirectUrl, function(err, filenameDomain, properties){
             
+            console.log("--------> Mobile friendly answered")
             if (!err && filenameDomain && properties) {
                 updateInsightDocument(filenameDomain, properties);
             }
@@ -81,6 +82,9 @@ function checkResponsiveDomains(current, domainNames, callback){
         });
         
         page_insights.check(domainName, function(err, filenameDomain, properties){
+            
+            console.log("--------> Insights answered")
+            
             if (!err && filenameDomain && properties) {
                 updateInsightDocument(filenameDomain, properties);
             }
@@ -92,6 +96,8 @@ function checkResponsiveDomains(current, domainNames, callback){
         });
         
         responsive.check(domainName, redirectUrl, function(err, filenameDomain, properties){
+            
+            console.log("--------> Responsive answered")
             
             if (!err && filenameDomain && properties) {
                 updateInsightDocument(filenameDomain, properties);
