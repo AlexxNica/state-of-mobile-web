@@ -7,12 +7,11 @@ var mobile_friendly = require('./utils/mobile_friendly.js');
 var Insight = require('./models/insight');
 
 // Read domains from the database and process them
-exports.processDomains = function(page, callback){
+exports.processDomains = function(callback){
     
     var limit = 5;
-    var skip = (page - 1) * limit;
     
-    Insight.find({"domain": {"$exists": true}, 'processed': {"$exists": false}}, {}, {skip: skip, limit: limit}).sort({'_id':1}).exec( function(err, data) {
+    Insight.find({"domain": {"$exists": true}, 'processed': {"$exists": false}}, {}, {limit: limit}).sort({'_id':1}).exec( function(err, data) {
         
         if (!err && data) {
             
@@ -61,7 +60,7 @@ function checkResponsiveDomains(current, domainNames, callback){
     
     } else {
         
-        console.log("checkonebyone ", current, domainNames[current]);
+        console.log("Checking domain ", current, domainNames[current]);
         
         var receivedResponse = 0;
         var domainName = domainNames[current]['domain'];
