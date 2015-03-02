@@ -61,12 +61,3 @@ exports.check = function(domainName, callback){
     }, 5000)
     
 }
-
-/*
-this.check('app.journalism.co.uk', function(err, domain, results){
-    console.log(err, domain, results);   
-});
-
-this.check('webcrumbz.co', function(err, domain, results){
-    console.log(err, domain, results);   
-});*/

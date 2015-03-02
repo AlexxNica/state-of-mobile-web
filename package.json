@@ -9,6 +9,7 @@
   "dependencies": {
     "canvas": "~1.1.6",
     "cheerio": "~0.18.0",
+    "diff": "~1.2.2",
     "es5-shim" : "~4.1.0",
     "fs-write-stream-atomic": "~1.0.2",
     "mocha": "~2.1.0",

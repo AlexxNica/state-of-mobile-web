@@ -35,8 +35,6 @@ exports.check = function(domain, callback) {
     cp.stdout.setEncoding('utf8');
 	cp.stdout.on('data', function (data) {
 		data = data.trim();
-		
-		// console.log("Data ", data)
         redirectUrl = data;
 	});
     
@@ -46,12 +44,3 @@ exports.check = function(domain, callback) {
         callback(0, domain, redirectUrl)
     });
 }
-
-/*
-this.check('thehindu.com', function(err, result, result2){
-    console.log(err, result, result2)  
-});
-
-this.check('theage.com.au', function(err, result, result2){
-    console.log(err, result, result2)  
-});*/

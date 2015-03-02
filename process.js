@@ -12,7 +12,7 @@ exports.processDomains = function(page, callback){
     var limit = 5;
     var skip = (page - 1) * limit;
     
-    Insight.find({"domain": {"$exists": true}, 'is_responsive': 0}, {}, {skip: skip, limit: limit}).sort({'_id':1}).exec( function(err, data) {
+    Insight.find({"domain": {"$exists": true}, 'processed': {"$exists": false}}, {}, {skip: skip, limit: limit}).sort({'_id':1}).exec( function(err, data) {
         
         if (!err && data) {
             
@@ -27,10 +27,12 @@ exports.processDomains = function(page, callback){
                 for ( var i = 0; i < data.length; i++ ) {
                     
                     var domainName = data[i].domain;
+                    
                     console.log(domainName)
                     
                     handle_redirect.check(domainName, function(err, domain, redirectUrl){
-                    
+                        
+                        console.log("domain ", domain , redirectUrl)
                         domainNames.push({'domain': domain, 'redirectUrl': redirectUrl});
                         
                         if (domainNames.length == data.length) {
@@ -90,8 +92,6 @@ function checkResponsiveDomains(current, domainNames, callback){
         });
         
         responsive.check(domainName, redirectUrl, function(err, filenameDomain, properties){
-            
-            console.log("receivedResponse responsive ", err, filenameDomain, properties);
             
             if (!err && filenameDomain && properties) {
                 updateInsightDocument(filenameDomain, properties);

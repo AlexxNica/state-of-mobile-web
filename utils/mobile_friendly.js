@@ -1,6 +1,8 @@
+var url = require("url");
 var request = require('request');
 var cheerio = require('cheerio');
 var wappalyzer = require("wappalyzer");
+var jsdiff = require('diff');
 
 // Constants used for making requests
 var iPhone6UserAgent = 'Mozilla/6.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/8.0 Mobile/10A5376e Safari/8536.25';
@@ -16,12 +18,9 @@ exports.check = function(domainName, redirectUrl, callback) {
         'processed': 1
     }
     
-    // Check if the redirect url is the same with the initial url
-    var finalUrl = redirectUrl;
-    finalUrl = finalUrl.replace("http://", "");
-    finalUrl = finalUrl.replace("https://", "");
+    // Check if the redirect hostname is the same with the initial domain
+    var finalUrl = url.parse(redirectUrl).hostname;
     finalUrl = finalUrl.replace("www.", "");
-    finalUrl = finalUrl.replace("/", "");
     
     // If we were redirected to a different url, assume we have a mobile friendly site
     if (finalUrl != domainName) {
@@ -93,7 +92,9 @@ exports.check = function(domainName, redirectUrl, callback) {
                         // If the request was completed successfully, compare the responses bodies
                         if (!err && resDesktop && resDesktop.statusCode == 200) {
                             
-                            if (bodyMobile != bodyDesktop) {
+                            var diff = jsdiff.diffLines(bodyMobile, bodyDesktop);
+                            
+                            if (diff.length > 100) {
                                 mobileProperties['is_adaptive'] = 1;
                             }
                         }
@@ -108,33 +109,3 @@ exports.check = function(domainName, redirectUrl, callback) {
         }
     })  
 }
-
-/*getMobileProperties('app.journalism.co.uk', function(err, result){
-    console.log(err, result)  
-});
-
-getMobileProperties('newyorktimes.com', function(err, result){
-    console.log(err, result)  
-});
-
-this.check('carrefour-online.ro', function(err, domain, result){
-    console.log(err, result)  
-});
-
-this.check('businessinsider.com', function(err, domain, result){
-    console.log(err, result)  
-});
-
-
-this.check('codelanka.github.io', function(err, domain, result){
-    console.log(err, result)  
-});
-
-this.check('thehindu.com', 'http://m.thehindu.com/', function(err, domain, result){
-    console.log(err, domain, result)  
-});
-*/
-/*
-this.check('smh.com.au', function(err, domain, result){
-    console.log(err, result)  
-});*/

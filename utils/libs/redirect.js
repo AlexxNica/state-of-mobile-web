@@ -13,6 +13,8 @@ var finalUrl = opts.url;
 // page.settings.userAgent = 'Mozilla/6.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/8.0 Mobile/10A5376e Safari/8536.25';
 page.settings.userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 5_0 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9A334 Safari/7534.48.3';
 
+page.settings.resourceTimeout = 30000;
+
 function formatTrace(trace) {
 	var src = trace.file || trace.sourceURL;
 	var fn = (trace.function ? ' in function ' + trace.function : '');
@@ -60,7 +62,6 @@ page.onResourceReceived = function (response) {
 // detect if the page is trying to redirect somewhere else
 page.onNavigationRequested = function(url, type, willNavigate, main) {
 	if (main && url != opts.url) {
-		// console.log("navigation requested ", url, type, willNavigate, main)
         finalUrl = url;
 	}
 };

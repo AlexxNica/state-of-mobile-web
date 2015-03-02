@@ -5,7 +5,7 @@ var fsWriteStreamAtomic = require('fs-write-stream-atomic');
 
 // Constants used for screenshots
 var iPhone6UserAgent = 'Mozilla/6.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/8.0 Mobile/10A5376e Safari/8536.25';
-
+var iPhone5UserAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 5_0 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9A334 Safari/7534.48.3';
 var iPhoneWidth = 375;
 var iPhoneHeight = 667;
 var iPhoneSize = String(iPhoneWidth) + "x" + String(iPhoneHeight);
@@ -41,10 +41,9 @@ exports.check = function(domainName, redirectUrl, callback){
                         responsiveProperties['height_ratio'] = Math.round(imageProperties.height * 100 / iPhoneHeight) / 100;
                     }
                     
-                    // Delete image file
+                    // Delete screenshot file
                     fs.unlink(filename, function (err) {
                         if (err) throw err;
-                        console.log('successfully deleted ' + filename);
                     });
                     
                     callback(0, domainName, responsiveProperties);
@@ -58,7 +57,7 @@ exports.check = function(domainName, redirectUrl, callback){
 // Make printscreen
 function makeScreen(domainName, redirectUrl, callback) {
     
-    var stream = screenshot(redirectUrl, iPhoneSize, {'delay': 2, 'customHeaders' : {'User-Agent' : iPhone6UserAgent }});
+    var stream = screenshot(redirectUrl, iPhoneSize, {'delay': 3, 'customHeaders' : {'User-Agent' : iPhone6UserAgent }});
         
     var dest = __dirname+'/../screenshots/'+domainName+'__'+iPhoneSize+'.png';
     var write = fsWriteStreamAtomic(dest);
@@ -111,12 +110,3 @@ function getImageSize(filename, callback){
         }
     });
 }
-
-/*
-this.check('thehindu.com', 'http://m.thehindu.com/', function(err, domain, result){
-    console.log(err, domain, result)  
-});
-
-this.check('hollywoodreporter.com', 'http://www.hollywoodreporter.com/', function(err, domain, result){
-    console.log(err, domain, result)  
-});*/
