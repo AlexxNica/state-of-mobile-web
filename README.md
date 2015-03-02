@@ -22,9 +22,9 @@ Adaptive, native apps and CMSes
 -------------------------------
 If a website doesn't have an associated mobile friendly website, we can check if it serves different content for a mobile user agent compared to a desktop user agent (utils/mobile_friendly.js). To prevent false positives, the website is considered adaptive only if the source differs by a number of lines (limit is set to 150 lines, but it can be easily changed).
 
-The presence of a native app is checked by using [SmartApp Banners](http://smartappbanners.com/) meta tags. This method is not 100% efficient as some website do not use SmartApp Banners and are marketing their apps in a different way.
+The presence of a native app is checked by using [SmartApp Banners](http://smartappbanners.com/) meta tags. This method is not 100% efficient as some websites do not use SmartApp Banners and are marketing their apps in a different way.
 
-The CMSes used by a website are retrieved with the help of the [Wappalyzer's](https://wappalyzer.com/) NodeJS plugin.
+The CMSes used by a website are retrieved with the help of [Wappalyzer's](https://wappalyzer.com/) NodeJS plugin.
 
 Processing requests
 -------------------
