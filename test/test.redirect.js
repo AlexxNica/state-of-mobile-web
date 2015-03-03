@@ -4,7 +4,7 @@ describe('handle_redirect', function(){
     
     describe('check', function(){
     
-        this.timeout(15000);
+        this.timeout(30000);
         
         it ('hindu.com should go to http://m.thehindu.com/', function(done){
         
@@ -38,6 +38,20 @@ describe('handle_redirect', function(){
                 assert.equal(0, err);
                 assert.equal('nypost.com', domain);
                 assert.equal('http://nypost.com/', mobileRedirect);
+                done();
+            });
+        })
+        
+        it ('mantecabulletin.com should go to http://mantecabulletin.com/m/', function(done){
+        
+            var handle_redirect = require("../utils/handle_redirect.js");
+            
+            handle_redirect.check('mantecabulletin.com', function(err, domain, mobileRedirect){
+                
+                console.log(mobileRedirect)
+                assert.equal(0, err);
+                assert.equal('mantecabulletin.com', domain);
+                assert.equal('http://mantecabulletin.com/m/', mobileRedirect);
                 done();
             });
         })

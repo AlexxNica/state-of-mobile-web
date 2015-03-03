@@ -18,9 +18,22 @@ exports.check = function(domainName, redirectUrl, callback) {
         'processed': 1
     }
     
-    // Check if the redirect hostname is the same with the initial domain
-    var finalUrl = url.parse(redirectUrl).hostname;
-    finalUrl = finalUrl.replace("www.", "");
+    // Check if the redirect hostname/path is the same with the initial domain    
+    var parsedUrl = url.parse(redirectUrl);
+    var finalUrl = parsedUrl.hostname;
+	finalUrl = finalUrl.replace("www.", "");
+	
+    // Some websites use relative paths for the mobile version (ex. /mobile or /touch)
+	if (parsedUrl.path != '/') {
+        
+		var relativePath = parsedUrl.path;
+		relativePath = relativePath.replace("/index.html", "");
+		relativePath = relativePath.replace("/home.aspx", "");
+		
+		if (relativePath != '/') {
+			finalUrl = finalUrl + relativePath;
+		}
+	}
     
     // If we were redirected to a different url, assume we have a mobile friendly site
     if (finalUrl != domainName) {

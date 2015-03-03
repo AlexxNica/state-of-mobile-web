@@ -1,3 +1,4 @@
+var url = require("url");
 var path = require('path');
 var phantomBridge = require('phantom-bridge');
 var es5 = require.resolve('es5-shim');

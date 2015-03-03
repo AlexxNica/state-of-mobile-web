@@ -84,5 +84,21 @@ describe('mobile_friendly', function(){
                 done();
             });
         })
+        
+        it ('mantecabulletin.com properties', function(done){
+        
+            var mobile_friendly = require("../utils/mobile_friendly.js");
+            
+            mobile_friendly.check('mantecabulletin.com', 'http://mantecabulletin.com/m/', function(err, domain, mobileProperties){
+                
+                assert.equal(0, err);
+                assert.equal('mantecabulletin.com', domain);
+                assert.equal(0, mobileProperties['is_adaptive']);
+                assert.equal(0, mobileProperties['has_app']);
+                assert.equal(1, mobileProperties['is_mobile_friendly']);
+                
+                done();
+            });
+        })
     })
 })
