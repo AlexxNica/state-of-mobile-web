@@ -13,6 +13,8 @@ var InsightSchema = new Schema({
     
     'is_adaptive': Number,
     'has_app': Number,
+    'has_FBIA': Number,
+    'links': Array,
     'app_meta_tag': String,
     'is_mobile_friendly': Number,
     'mobile_friendly_url': String,

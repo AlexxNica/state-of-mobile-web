@@ -14,8 +14,10 @@ exports.check = function(domainName, redirectUrl, callback) {
     var mobileProperties = {
         'is_adaptive' : 0,
         'has_app' : 0,
+        'has_FBIA' : 0,
         'is_mobile_friendly' : 0,
-        'processed': 1
+        'processed': 1,
+        'links': []
     }
     
     // Check if the redirect hostname/path is the same with the initial domain    
@@ -61,10 +63,34 @@ exports.check = function(domainName, redirectUrl, callback) {
             // Check if the source contains a meta tag indicating a native app (smart banner)
             var $ = cheerio.load(bodyMobile);
             var iTunesMetaTag = $('meta[name=apple-itunes-app]');
-            
+            var FBIAMetaTag = $('meta[property="fb:pages"]');
+
+            var AMPLinks = [];
+            var j = 0;
+
+            $('a').each(function(i, elem) {
+                var link = $(this).attr('href');
+
+                if (typeof link !== 'undefined' && (link.search(domainName) !== -1 || link.charAt(0) === '/')) {
+                    j++;
+                    AMPLinks.push(link);
+                }
+                if (j === 50) {
+                    return false;
+                }
+            });
+
             if (iTunesMetaTag.length > 0) {
                 mobileProperties['has_app'] = 1;
                 mobileProperties['app_meta_tag'] = $('meta[name=apple-itunes-app]').attr("content");
+            }
+
+            if (FBIAMetaTag.length > 0) {
+                mobileProperties['has_FBIA'] = 1;
+            }
+
+            if(AMPLinks.length > 0) {
+                mobileProperties['links'] = AMPLinks;
             }
             
             // Check adaptive
