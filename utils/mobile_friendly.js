@@ -68,7 +68,7 @@ exports.check = function(domainName, redirectUrl, callback) {
             var AMPLinks = [];
             var j = 0;
 
-            $('a').each(function(i, elem) {
+            $('a[href]').each(function(i, elem) {
                 var link = $(this).attr('href');
 
                 if (typeof link !== 'undefined' && (link.search(domainName) !== -1 || link.charAt(0) === '/')) {
