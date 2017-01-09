@@ -11,7 +11,7 @@ exports.processDomains = function( callback){
     
     var limit = 5;
 
-    Insight.find({"domain": {"$exists": true}, 'processed': {"$exists": false}}, {}, {limit: limit}).sort({'_id':1}).exec( function(err, data) {
+    Insight.find({"domain": {"$exists": true}, 'processed': 0}, {}, {limit: limit}).sort({'_id':1}).exec( function(err, data) {
         
         if (!err && data) {
             
